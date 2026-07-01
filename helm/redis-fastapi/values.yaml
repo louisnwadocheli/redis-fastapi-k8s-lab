@@ -1,0 +1,33 @@
+api:
+  name: python-api
+  replicaCount: 1
+  image:
+    repository: python-api
+    tag: latest
+    pullPolicy: Never
+  containerPort: 8000
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 8000
+
+redis:
+  name: redis
+  replicaCount: 1
+  image:
+    repository: redis
+    tag: "7"
+  port: 6379
+  password: redis-123
+  persistence:
+    enabled: true
+    storage: 1Gi
+    storageClassName: standard
+
+ingress:
+  enabled: true
+  name: fastapi-ingress
+  className: nginx
+  host: localhost
+  path: /api/?(.*)
+  rewriteTarget: /$1
