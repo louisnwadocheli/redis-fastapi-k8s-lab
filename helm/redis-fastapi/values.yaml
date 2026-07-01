@@ -1,6 +1,6 @@
 api:
   name: python-api
-  replicaCount: 1
+  replicaCount: 2
   image:
     repository: python-api
     tag: latest
