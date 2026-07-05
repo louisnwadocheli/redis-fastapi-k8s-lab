@@ -1,0 +1,59 @@
+api:
+  name: python-api
+  replicaCount: 3
+  image:
+    repository: 762810755713.dkr.ecr.eu-west-2.amazonaws.com/python-api
+    tag: 17e394e
+    pullPolicy: Always
+  containerPort: 8000
+
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 8000
+
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "500m"
+      memory: "512Mi"
+
+  probes:
+    startup:
+      path: /health
+      initialDelaySeconds: 5
+      periodSeconds: 5
+      failureThreshold: 12
+    readiness:
+      path: /health
+      initialDelaySeconds: 5
+      periodSeconds: 10
+      failureThreshold: 3
+    liveness:
+      path: /health
+      initialDelaySeconds: 15
+      periodSeconds: 20
+      failureThreshold: 3
+
+redis:
+  name: redis
+  replicaCount: 1
+  image:
+    repository: redis
+    tag: 7
+  port: 6379
+  password: redis-123
+  persistence:
+    enabled: true
+    storage: 5Gi
+    storageClassName: gp2
+
+ingress:
+  enabled: true
+  name: fastapi-ingress
+  className: alb
+  host: ""
+  path: /
+  rewriteTarget: ""
