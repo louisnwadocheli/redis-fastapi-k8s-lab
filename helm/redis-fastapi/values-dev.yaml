@@ -48,7 +48,7 @@ redis:
   persistence:
     enabled: true
     storage: 1Gi
-    storageClassName: gp2-csi
+    storageClassName: gp2
 
 ingress:
   enabled: true
