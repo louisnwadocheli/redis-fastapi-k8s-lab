@@ -5,17 +5,18 @@ kind: Ingress
 metadata:
   name: {{ .Values.ingress.name }}
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: {{ .Values.ingress.rewriteTarget }}
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80}]'
 
 spec:
   ingressClassName: {{ .Values.ingress.className }}
 
   rules:
-    - host: {{ .Values.ingress.host }}
-      http:
+    - http:
         paths:
           - path: {{ .Values.ingress.path }}
-            pathType: ImplementationSpecific
+            pathType: Prefix
             backend:
               service:
                 name: {{ .Values.api.name }}

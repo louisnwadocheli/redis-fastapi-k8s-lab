@@ -4,15 +4,10 @@ import os
 
 app = FastAPI()
 
-# Redis connection settings.
-# In Kubernetes, these values will come from ConfigMap and Secret.
-# Locally, default values are used if environment variables are missing.
 REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
 REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
 REDIS_PASSWORD = os.getenv("REDIS_PASSWORD")
 
-# Create Redis client.
-# decode_responses=False means Redis returns bytes, so we decode manually later.
 r = redis.Redis(
     host=REDIS_HOST,
     port=REDIS_PORT,
@@ -30,7 +25,25 @@ async def log_requests(request: Request, call_next):
 
 @app.get("/")
 def root():
-    return {"message": "FastAPI is working"}
+    return {"message": "FastAPI version 2 is working"}
+
+
+@app.get("/health")
+def health():
+    try:
+        r.ping()
+        return {
+            "status": "healthy",
+            "redis": "connected"
+        }
+    except redis.RedisError:
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "status": "unhealthy",
+                "redis": "not connected"
+            }
+        )
 
 
 @app.post("/cache")
