@@ -3,7 +3,7 @@ api:
   replicaCount: 2
   image:
     repository: 762810755713.dkr.ecr.eu-west-2.amazonaws.com/python-api
-    tag: v2
+    tag: 17e394e
     pullPolicy: Always
   containerPort: 8000
 
@@ -42,7 +42,7 @@ redis:
   replicaCount: 1
   image:
     repository: redis
-    tag: "7"
+    tag: 17e394e
   port: 6379
   password: redis-123
   persistence:
