@@ -81,10 +81,57 @@ pipeline {
         stage('Update Helm Values') {
             steps {
                 sh """
-                sed -i 's/tag: .*/tag: ${IMAGE_TAG}/' helm/redis-fastapi/values-eks.yaml
+                python3 - <<'PY'
+from pathlib import Path
+import os
 
-                echo "Updated values-eks.yaml:"
-                grep -A 5 "image:" helm/redis-fastapi/values-eks.yaml
+image_tag = os.environ["IMAGE_TAG"]
+path = Path("helm/redis-fastapi/values-dev.yaml")
+
+lines = path.read_text().splitlines()
+new_lines = []
+
+inside_api = False
+inside_api_image = False
+
+ for_line_error = False
+
+for line in lines:
+    stripped = line.strip()
+
+    if line.startswith("api:"):
+        inside_api = True
+        inside_api_image = False
+        new_lines.append(line)
+        continue
+
+    if line.startswith("redis:") or line.startswith("ingress:"):
+        inside_api = False
+        inside_api_image = False
+        new_lines.append(line)
+        continue
+
+    if inside_api and stripped == "image:":
+        inside_api_image = True
+        new_lines.append(line)
+        continue
+
+    if inside_api_image and stripped.startswith("tag:"):
+        indent = line[:len(line) - len(line.lstrip())]
+        new_lines.append(f"{indent}tag: {image_tag}")
+        inside_api_image = False
+        continue
+
+    new_lines.append(line)
+
+path.write_text("\\n".join(new_lines) + "\\n")
+PY
+
+                echo "Updated API image tag only:"
+                grep -A 6 "repository: ${IMAGE_NAME}" helm/redis-fastapi/values-dev.yaml || true
+
+                echo "Redis tag should remain 7:"
+                grep -A 5 "redis:" helm/redis-fastapi/values-dev.yaml
                 """
             }
         }
@@ -100,9 +147,9 @@ pipeline {
                     git config user.name "${GIT_USER_NAME}"
                     git config user.email "${GIT_USER_EMAIL}"
 
-                    git add helm/redis-fastapi/values-eks.yaml
+                    git add helm/redis-fastapi/values-dev.yaml
 
-                    git commit -m "Update image tag to ${IMAGE_TAG}" || echo "No changes to commit"
+                    git commit -m "Update API image tag to ${IMAGE_TAG}" || echo "No changes to commit"
 
                     git push https://${GIT_USERNAME}:${GIT_TOKEN}@github.com/louisnwadocheli/redis-fastapi-k8s-lab.git HEAD:main
                     """
@@ -115,7 +162,7 @@ pipeline {
         success {
             echo "Pipeline Successful"
             echo "Image pushed: ${IMAGE_NAME}:${IMAGE_TAG}"
-            echo "Helm values updated with image tag: ${IMAGE_TAG}"
+            echo "Helm values updated with API image tag: ${IMAGE_TAG}"
         }
 
         failure {
