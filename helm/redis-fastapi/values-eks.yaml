@@ -42,7 +42,7 @@ redis:
   replicaCount: 1
   image:
     repository: redis
-    tag: 17e394e
+    tag: 7
   port: 6379
   password: redis-123
   persistence:
