@@ -15,3 +15,13 @@ override.tf
 override.tf.json
 *_override.tf
 *_override.tf.json
+
+# Terraform
+**/.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+crash.log
+crash.*.log
+EOF
+
