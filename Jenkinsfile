@@ -92,7 +92,7 @@ pipeline {
         stage('Commit and Push Helm Update') {
             steps {
                 withCredentials([usernamePassword(
-                    credentialsId: 'github-https',
+                    credentialsId: 'redis-github-https',
                     usernameVariable: 'GIT_USERNAME',
                     passwordVariable: 'GIT_TOKEN'
                 )]) {
